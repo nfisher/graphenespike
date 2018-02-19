@@ -21,6 +21,7 @@ class RoutesTestCase(unittest.TestCase):
         self.assertIn(b"Go away!", resp.data, msg="/ response should contain expected data")
 
     def test_get_graphql(self):
+        self.skipTest("need to use graphene test client.")
         resp = self.GET("/graphql")
 
         self.assertEqual(200, resp.status_code, msg="/graphql response should be OK")
