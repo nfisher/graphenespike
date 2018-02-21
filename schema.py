@@ -1,144 +1,168 @@
 import graphene
-import flask
 import models
 
 def get_films(ids):
     if ids is None:
         return []
     c = models.Films.objects.filter(id__in = ids)
-    return [Film(
-        cur.id,
-        episode_id=cur.episode_id,
-        title=cur.title,
-        director=cur.director,
-        producer=cur.producer,
-        release_date=cur.release_date,
-        opening_crawl=cur.opening_crawl,
-        species=cur.species,
-        starships=cur.starships,
-        vehicles=cur.vehicles,
-        characters=cur.characters,
-        planets=cur.planets,
-        ) for cur in c]
+    a = []
+    for cur in c:
+        f = Film(
+                cur.id,
+                episode_id=cur.episode_id,
+                title=cur.title,
+                director=cur.director,
+                producer=cur.producer,
+                release_date=cur.release_date,
+                opening_crawl=cur.opening_crawl,
+                species=cur.species,
+                starships=cur.starships,
+                vehicles=cur.vehicles,
+                characters=cur.characters,
+                planets=cur.planets,
+                )
+        a.append(f)
+    return a
 
 def get_species(ids):
     if ids is None:
         return []
     c = models.Species.objects.filter(id__in = ids)
-    return [Specie(
-        cur.id,
-        name=cur.name,
-        classification=cur.classification,
-        designation=cur.designation,
-        average_height=cur.average_height,
-        average_lifespan=cur.average_lifespan,
-        eye_colors=cur.eye_colors,
-        hair_colors=cur.hair_colors,
-        skin_colors=cur.skin_colors,
-        homeworld=cur.homeworld,
-        language=cur.language,
-        people=cur.people,
-        films=cur.films,
-        ) for cur in c]
-
+    a = []
+    for cur in c:
+        s = Specie(
+                cur.id,
+                name=cur.name,
+                classification=cur.classification,
+                designation=cur.designation,
+                average_height=cur.average_height,
+                average_lifespan=cur.average_lifespan,
+                eye_colors=cur.eye_colors,
+                hair_colors=cur.hair_colors,
+                skin_colors=cur.skin_colors,
+                homeworld=cur.homeworld,
+                language=cur.language,
+                people=cur.people,
+                films=cur.films,
+                )
+        a.append(s)
+    return a
 
 def get_starships(ids):
     if ids is None:
         return []
     c = models.Starships.objects.filter(id__in = ids)
-    return [Starship(
-        cur.id,
-        name=cur.name,
-        cargo_capacity=cur.cargo_capacity,
-        consumables=cur.consumables,
-        cost_in_credits=cur.cost_in_credits,
-        crew=cur.crew,
-        hyperdrive_rating=cur.hyperdrive_rating,
-        length=cur.length,
-        manufacturer=cur.manufacturer,
-        max_atmosphering_speed=cur.max_atmosphering_speed,
-        mglt=cur.mglt,
-        model=cur.model,
-        passengers=cur.passengers,
-        starship_class=cur.starship_class,
-        films=cur.films,
-        pilots=cur.pilots,
-        ) for cur in c]
+    a = []
+    for cur in c:
+        s = Starship(
+                cur.id,
+                name=cur.name,
+                cargo_capacity=cur.cargo_capacity,
+                consumables=cur.consumables,
+                cost_in_credits=cur.cost_in_credits,
+                crew=cur.crew,
+                hyperdrive_rating=cur.hyperdrive_rating,
+                length=cur.length,
+                manufacturer=cur.manufacturer,
+                max_atmosphering_speed=cur.max_atmosphering_speed,
+                mglt=cur.mglt,
+                model=cur.model,
+                passengers=cur.passengers,
+                starship_class=cur.starship_class,
+                films=cur.films,
+                pilots=cur.pilots,
+                )
+        a.append(s)
+    return a
 
 def get_characters(ids):
     if ids is None:
         return []
     c = models.People.objects.filter(id__in = ids)
-    return [Character(
-        cur.id,
-        name=cur.name,
-        height=cur.height,
-        mass=cur.mass,
-        skin_color=cur.skin_color,
-        eye_color=cur.eye_color,
-        birth_year=cur.birth_year,
-        gender=cur.gender,
-        films=cur.films,
-        species=cur.species,
-        starships=cur.starships,
-        vehicles=cur.vehicles,
-        ) for cur in c]
+    a = []
+    for cur in c:
+        c = Character(
+                cur.id,
+                name=cur.name,
+                height=cur.height,
+                mass=cur.mass,
+                skin_color=cur.skin_color,
+                eye_color=cur.eye_color,
+                birth_year=cur.birth_year,
+                gender=cur.gender,
+                films=cur.films,
+                species=cur.species,
+                starships=cur.starships,
+                vehicles=cur.vehicles,
+                )
+        a.append(c)
+    return a
 
 def get_planets(ids):
     if ids is None:
         return []
     c = models.Planets.objects.filter(id__in = ids)
-    return [Planet(
-        cur.id,
-        name=cur.name,
-        diameter=cur.diameter,
-        rotation_period=cur.rotation_period,
-        orbital_period=cur.orbital_period,
-        gravity=cur.gravity,
-        population=cur.population,
-        climate=cur.climate,
-        terrain=cur.terrain,
-        surface_water=cur.surface_water,
-        residents=cur.residents,
-        films=cur.films,
-        ) for cur in c]
+    a = []
+    for cur in c:
+        p = Planet(
+                cur.id,
+                name=cur.name,
+                diameter=cur.diameter,
+                rotation_period=cur.rotation_period,
+                orbital_period=cur.orbital_period,
+                gravity=cur.gravity,
+                population=cur.population,
+                climate=cur.climate,
+                terrain=cur.terrain,
+                surface_water=cur.surface_water,
+                residents=cur.residents,
+                films=cur.films,
+                )
+        a.append(p)
+    return a
 
 def get_vehicles(ids):
     if ids is None:
         return []
     c = models.Vehicles.objects.filter(id__in  = ids)
-    return [Vehicle(
-        cur.id,
-        name=cur.name,
-        diameter=cur.diameter,
-        rotation_period=cur.rotation_period,
-        orbital_period=cur.orbital_period,
-        gravity=cur.gravity,
-        population=cur.population,
-        climate=cur.climate,
-        terrain=cur.terrain,
-        surface_water=cur.surface_water,
-        residents=cur.residents,
-        films=cur.films,
-        ) for cur in c]
+    a = []
+    for cur in c:
+        v = Vehicle(
+                cur.id,
+                name=cur.name,
+                diameter=cur.diameter,
+                rotation_period=cur.rotation_period,
+                orbital_period=cur.orbital_period,
+                gravity=cur.gravity,
+                population=cur.population,
+                climate=cur.climate,
+                terrain=cur.terrain,
+                surface_water=cur.surface_water,
+                residents=cur.residents,
+                films=cur.films,
+                )
+        a.append(v)
+    return a
 
-def get_episode(episode_id):
+def get_film(episode_id):
         ep = models.Films.objects(episode_id=episode_id).first()
-        return Film(
-            ep.id,
-            episode_id=ep.episode_id,
-            title=ep.title,
-            director=ep.director,
-            producer=ep.producer,
-            release_date=ep.release_date,
-            opening_crawl=ep.opening_crawl,
-            species=ep.species,
-            characters=ep.characters,
-            starships=ep.starships,
-            planets=ep.planets,
-            )
+        f = Film(
+                ep.id,
+                episode_id=ep.episode_id,
+                title=ep.title,
+                director=ep.director,
+                producer=ep.producer,
+                release_date=ep.release_date,
+                opening_crawl=ep.opening_crawl,
+                species=ep.species,
+                characters=ep.characters,
+                starships=ep.starships,
+                planets=ep.planets,
+                )
+        return f
 
 class Film(graphene.ObjectType):
+    _parent_span = None
     id = graphene.ID()
     episode_id = graphene.Int()
     title = graphene.String()
@@ -161,9 +185,10 @@ class Film(graphene.ObjectType):
         return get_starships(list(self.starships))
 
     def resolve_planets(self, info):
-        return get_planets(list(self.planets))        
+        return get_planets(list(self.planets))
 
 class Character(graphene.ObjectType):
+    _parent_span = None
     id = graphene.ID()
     name = graphene.String()
     height = graphene.String()
@@ -190,6 +215,7 @@ class Character(graphene.ObjectType):
         return get_vehicles(list(self.vehicles))
 
 class Starship(graphene.ObjectType):
+    _parent_span = None
     id = graphene.ID()
     name = graphene.String()
     consumables = graphene.String()
@@ -214,10 +240,12 @@ class Starship(graphene.ObjectType):
         return get_characters(list(self.pilots))
 
 class Vehicle(graphene.ObjectType):
+    _parent_span = None
     id = graphene.ID()
     name = graphene.String()
 
 class Planet(graphene.ObjectType):
+    _parent_span = None
     id = graphene.ID()
     name = graphene.String()
     diameter = graphene.String()
@@ -238,6 +266,7 @@ class Planet(graphene.ObjectType):
         return get_characters(list(self.residents))
 
 class Specie(graphene.ObjectType):
+    _parent_span = None
     id = graphene.ID()
     name = graphene.String()
     classification = graphene.String()
@@ -277,7 +306,7 @@ class Query(graphene.ObjectType):
     episode = graphene.Field(Film, episode_id=Episode())
 
     def resolve_episode(self, info, episode_id):
-        return get_episode(episode_id)
+        return get_film(episode_id)
 
 schema = graphene.Schema(query=Query)
 

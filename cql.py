@@ -1,4 +1,5 @@
 import cassandra.cluster as cluster
+import cassandra.policies as policies
 
 PING_QUERY = 'SELECT uuid() FROM system.local;'
 def ping(sess):
@@ -17,7 +18,8 @@ def session(hosts = ["127.0.0.1"]):
     session returns the Cassandra connection.
     """
     # TODO (NF 2018-02-13): Use connection pool.
-    return cluster.Cluster(hosts).connect()
+    lbp = policies.RoundRobinPolicy()
+    return cluster.Cluster(hosts, load_balancing_policy=lbp).connect()
 
 def hosts(app):
     """

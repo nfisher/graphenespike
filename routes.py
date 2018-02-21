@@ -1,10 +1,9 @@
 import flask
-import flask_graphql as graphql
+
 import socket
 import os
 import cql
 import models
-import schema
 
 app = flask.Flask("graphenespike")
 
@@ -16,9 +15,6 @@ app.config.update(JSONIFY_PRETTYPRINT_REGULAR=False)
 @app.route("/")
 def root():
     return "Go away!"
-
-view = graphql.GraphQLView.as_view('graphql', schema=schema.schema, graphiql=True, graphiql_template=schema.HTML)
-app.add_url_rule("/graphql", view_func=view)
 
 @app.route("/healthz")
 def healthz():
