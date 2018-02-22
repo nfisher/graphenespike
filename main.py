@@ -27,6 +27,17 @@ def initialize_tracer():
 
 tracer = ot.FlaskTracer(initialize_tracer, True, routes.app)
 
+class ResolveInfoProxy:
+    def __init__(self, info, tracer, name):
+        self._info = info
+        self._tracer = tracer
+        self._name = name
+        self._parent = None
+
+    def __getattr__(self, item):
+       result = getattr(self._info, item)
+       return result
+
 def operation_name(parent_type, field_name):
     if parent_type is None:
         return field_name
@@ -47,13 +58,8 @@ def tracer_middleware(next, root, info, **args):
     if isinstance(info.return_type, definition.GraphQLScalarType):
         return_value = next(root, info, **args)
     else:
-        parent_span = tracer.get_span()
-        child_span = tracer._tracer.start_span(
-                operation_name(parent_type, info.field_name),
-                child_of=parent_span,
-            )
-        return_value = next(root, info, **args)
-        child_span.finish()
+        name = operation_name(parent_type, info.field_name)
+        return_value = next(root, ResolveInfoProxy(info, tracer, name), **args)
 
     return return_value
 

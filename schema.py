@@ -1,32 +1,51 @@
 import graphene
 import models
 
-def get_films(ids):
-    if ids is None:
-        return []
-    c = models.Films.objects.filter(id__in = ids)
-    a = []
-    for cur in c:
-        f = Film(
-                cur.id,
-                episode_id=cur.episode_id,
-                title=cur.title,
-                director=cur.director,
-                producer=cur.producer,
-                release_date=cur.release_date,
-                opening_crawl=cur.opening_crawl,
-                species=cur.species,
-                starships=cur.starships,
-                vehicles=cur.vehicles,
-                characters=cur.characters,
-                planets=cur.planets,
-                )
-        a.append(f)
-    return a
+def start_span(info):
+    tracer = info._tracer
+    parent_span = info._parent
+    if parent_span is None:
+        print("Parent span unavailable linking to root")
+        parent_span = tracer.get_span()
 
-def get_species(ids):
+    span = tracer._tracer.start_span(info._name, child_of=parent_span)
+    return span
+
+def get_films(ids, info):
+    with start_span(info) as span:
+        if ids is None:
+            span.log_kv({"ids": ids})
+            return []
+
+        c = models.Films.objects.filter(id__in = ids)
+        a = []
+        for cur in c:
+            f = Film(
+                    cur.id,
+                    episode_id=cur.episode_id,
+                    title=cur.title,
+                    director=cur.director,
+                    producer=cur.producer,
+                    release_date=cur.release_date,
+                    opening_crawl=cur.opening_crawl,
+                    species=cur.species,
+                    starships=cur.starships,
+                    vehicles=cur.vehicles,
+                    characters=cur.characters,
+                    planets=cur.planets,
+                    )
+            f._parent_span = span
+            a.append(f)
+        span.log_kv({"ids": ids})
+        return a
+
+def get_species(ids, info):
+    span = start_span(info)
     if ids is None:
+        span.log_kv({"ids": ids})
+        span.finish()
         return []
+
     c = models.Species.objects.filter(id__in = ids)
     a = []
     for cur in c:
@@ -45,12 +64,19 @@ def get_species(ids):
                 people=cur.people,
                 films=cur.films,
                 )
+        s._parent_span = span
         a.append(s)
+    span.log_kv({"ids": ids})
+    span.finish()
     return a
 
-def get_starships(ids):
+def get_starships(ids, info):
+    span = start_span(info)
     if ids is None:
+        span.log_kv({"ids": ids})
+        span.finish()
         return []
+
     c = models.Starships.objects.filter(id__in = ids)
     a = []
     for cur in c:
@@ -73,10 +99,15 @@ def get_starships(ids):
                 pilots=cur.pilots,
                 )
         a.append(s)
+    span.log_kv({"ids": ids})
+    span.finish()
     return a
 
-def get_characters(ids):
+def get_characters(ids, info):
+    span = start_span(info)
     if ids is None:
+        span.log_kv({"ids": ids})
+        span.finish()
         return []
     c = models.People.objects.filter(id__in = ids)
     a = []
@@ -95,11 +126,17 @@ def get_characters(ids):
                 starships=cur.starships,
                 vehicles=cur.vehicles,
                 )
+        c._parent_span = span
         a.append(c)
+    span.log_kv({"ids": ids})
+    span.finish()
     return a
 
-def get_planets(ids):
+def get_planets(ids, info):
+    span = start_span(info)
     if ids is None:
+        span.log_kv({"ids": ids})
+        span.finish()
         return []
     c = models.Planets.objects.filter(id__in = ids)
     a = []
@@ -118,11 +155,17 @@ def get_planets(ids):
                 residents=cur.residents,
                 films=cur.films,
                 )
+        p._parent_span = span
         a.append(p)
+    span.log_kv({"ids": ids})
+    span.finish()
     return a
 
-def get_vehicles(ids):
+def get_vehicles(ids, info):
+    span = start_span(info)
     if ids is None:
+        span.log_kv({"ids": ids})
+        span.finish()
         return []
     c = models.Vehicles.objects.filter(id__in  = ids)
     a = []
@@ -141,25 +184,31 @@ def get_vehicles(ids):
                 residents=cur.residents,
                 films=cur.films,
                 )
+        v._parent_span = span
         a.append(v)
+    span.log_kv({"ids": ids})
+    span.finish()
     return a
 
-def get_film(episode_id):
-        ep = models.Films.objects(episode_id=episode_id).first()
-        f = Film(
-                ep.id,
-                episode_id=ep.episode_id,
-                title=ep.title,
-                director=ep.director,
-                producer=ep.producer,
-                release_date=ep.release_date,
-                opening_crawl=ep.opening_crawl,
-                species=ep.species,
-                characters=ep.characters,
-                starships=ep.starships,
-                planets=ep.planets,
-                )
-        return f
+def get_film(episode_id, info):
+    span = start_span(info)
+    ep = models.Films.objects(episode_id=episode_id).first()
+    f = Film(
+            ep.id,
+            episode_id=ep.episode_id,
+            title=ep.title,
+            director=ep.director,
+            producer=ep.producer,
+            release_date=ep.release_date,
+            opening_crawl=ep.opening_crawl,
+            species=ep.species,
+            characters=ep.characters,
+            starships=ep.starships,
+            planets=ep.planets,
+            )
+    span.log_kv({"ids": episode_id})
+    span.finish()
+    return f
 
 class Film(graphene.ObjectType):
     _parent_span = None
@@ -176,16 +225,20 @@ class Film(graphene.ObjectType):
     planets = graphene.List(lambda: Planet)
 
     def resolve_species(self, info):
-        return get_species(list(self.species))
+        info._parent = self._parent_span
+        return get_species(list(self.species), info)
 
     def resolve_characters(self, info):
-        return get_characters(list(self.characters))
+        info._parent = self._parent_span
+        return get_characters(list(self.characters), info)
     
     def resolve_starships(self, info):
-        return get_starships(list(self.starships))
+        info._parent = self._parent_span
+        return get_starships(list(self.starships), info)
 
     def resolve_planets(self, info):
-        return get_planets(list(self.planets))
+        info._parent = self._parent_span
+        return get_planets(list(self.planets), info)
 
 class Character(graphene.ObjectType):
     _parent_span = None
@@ -203,16 +256,20 @@ class Character(graphene.ObjectType):
     vehicles = graphene.List(lambda: Vehicle)
 
     def resolve_films(self, info):
-        return get_films(list(self.films))
+        info._parent = self._parent_span
+        return get_films(list(self.films), info)
 
     def resolve_species(self, info):
-        return get_species(list(self.species))
+        info._parent = self._parent_span
+        return get_species(list(self.species), info)
     
     def resolve_starships(self, info):
-        return get_starships(list(self.starships))
+        info._parent = self._parent_span
+        return get_starships(list(self.starships), info)
 
     def resolve_vehicles(self, info):
-        return get_vehicles(list(self.vehicles))
+        info._parent = self._parent_span
+        return get_vehicles(list(self.vehicles), info)
 
 class Starship(graphene.ObjectType):
     _parent_span = None
@@ -234,10 +291,12 @@ class Starship(graphene.ObjectType):
     pilots = graphene.List(lambda: Character)
 
     def resolve_films(self, info):
-        return get_films(list(self.films))
+        info._parent = self._parent_span
+        return get_films(list(self.films), info)
     
     def resolve_pilots(self, info):
-        return get_characters(list(self.pilots))
+        info._parent = self._parent_span
+        return get_characters(list(self.pilots), info)
 
 class Vehicle(graphene.ObjectType):
     _parent_span = None
@@ -260,10 +319,12 @@ class Planet(graphene.ObjectType):
     films = graphene.List(lambda: Film)
 
     def resolve_films(self, info):
-        return get_films(list(self.films))
+        info._parent = self._parent_span
+        return get_films(list(self.films), info)
     
     def resolve_residents(self, info):
-        return get_characters(list(self.residents))
+        info._parent = self._parent_span
+        return get_characters(list(self.residents), info)
 
 class Specie(graphene.ObjectType):
     _parent_span = None
@@ -282,16 +343,20 @@ class Specie(graphene.ObjectType):
     films = graphene.List(lambda: Film)
     
     def resolve_homeworld(self, info):
-        if self.homeworld is None:
-            return []
+        info._parent = self._parent_span
         ids = [self.homeworld]
-        return get_planets(ids)
+        if self.homeworld is None:
+            ids = []
+
+        return get_planets(ids, info)
 
     def resolve_films(self, info):
-        return get_films(list(self.films))
+        info._parent = self._parent_span
+        return get_films(list(self.films), info)
     
     def resolve_people(self, info):
-        return get_characters(list(self.people))
+        info._parent = self._parent_span
+        return get_characters(list(self.people), info)
 
 class Episode(graphene.Enum):
     PHANTOM = 1
@@ -306,7 +371,7 @@ class Query(graphene.ObjectType):
     episode = graphene.Field(Film, episode_id=Episode())
 
     def resolve_episode(self, info, episode_id):
-        return get_film(episode_id)
+        return get_film(episode_id, info)
 
 schema = graphene.Schema(query=Query)
 
