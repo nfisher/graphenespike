@@ -74,7 +74,7 @@ def main():
         graphiql=True,
         graphiql_template=schema.HTML)
     routes.app.add_url_rule("/graphql", view_func=view)
-    routes.app.run(use_reloader=True)
+    routes.app.run(use_reloader=True, threaded=True)
 
 if "__main__" == __name__:
     main()
