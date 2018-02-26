@@ -4,7 +4,6 @@ import cql
 import loaders
 import threading
 from .html import HTML
-from .fetch import *
 
 __all__ = ["html"]
 
